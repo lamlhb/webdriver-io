@@ -23,6 +23,7 @@
     },
     "homepage": "https://github.com/lamlhb/webdriver-io#readme",
     "devDependencies": {
+        "@wdio/allure-reporter": "^7.16.3",
         "@wdio/appium-service": "^7.20.8",
         "@wdio/cli": "^7.20.9",
         "@wdio/cucumber-framework": "^7.20.8",
@@ -37,5 +38,8 @@
         "typescript": "^4.6.4",
         "wdio-chromedriver-service": "^7.3.2",
         "wdio-cucumberjs-json-reporter": "^4.4.3"
+    },
+    "dependencies": {
+        "allure-commandline": "^2.20.1"
     }
 }
