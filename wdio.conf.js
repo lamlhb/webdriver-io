@@ -1,3 +1,4 @@
+const allure = require('allure-commandline')
 const { generate } = require('multiple-cucumber-html-reporter');
 const cucumberJson = require('wdio-cucumberjs-json-reporter');
 exports.config = {
@@ -134,14 +135,11 @@ exports.config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: [
-        [
-            'cucumberjs-json', {
-                jsonFolder: './reports/json',
-                language: 'en',
-            }
-        ]
-    ],
+    reporters: [['allure', {
+        outputDir: 'allure-results',
+        disableWebdriverStepsReporting: true,
+        disableWebdriverScreenshotsReporting: false,
+    }]],
 
 
     //
@@ -269,8 +267,9 @@ exports.config = {
      * @param {number}             result.duration  duration of scenario in milliseconds
      * @param {Object}             context          Cucumber World object
      */
-    // afterStep: function (step, scenario, result, context) {
-    // },
+    afterStep: function (step, scenario, result, context) {
+        browser.takeScreenshot();
+    },
     /**
      *
      * Runs after a Cucumber Scenario.
@@ -328,13 +327,26 @@ exports.config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {<Object>} results object containing test results
      */
-     onComplete: function(exitCode, config, capabilities, results) {
-        generate({
-            jsonDir: './reports/json',
-            reportPath: './reports/html',
-            openReportInBrowser: true
-        });
-    },
+     onComplete: function() {
+        const reportError = new Error('Could not generate Allure report')
+        const generation = allure(['generate', 'allure-results', '--clean'])
+        return new Promise((resolve, reject) => {
+            const generationTimeout = setTimeout(
+                () => reject(reportError),
+                5000)
+
+            generation.on('exit', function(exitCode) {
+                clearTimeout(generationTimeout)
+
+                if (exitCode !== 0) {
+                    return reject(reportError)
+                }
+
+                console.log('Allure report successfully generated')
+                resolve()
+            })
+        })
+    }
     // onComplete: function(exitCode, config, capabilities, results) {
     // },
     /**
